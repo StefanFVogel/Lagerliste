@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagerliste</title>
+</head>
+<body>
+    <h2>Lagerliste</h2>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Modell</th>
+                <th>Hersteller</th>
+                <th>Seriennummer</th>
+                <th>Kunde</th>
+                <th>Verkauft</th>
+                <th>Anzahlung (€)</th>
+                <th>Gesamtpreis (€)</th>
+                <th>Offene Summe (€)</th>
+                <th>Lagerbestand</th>
+                <th>Standort</th>
+                <th>Eingangsdatum</th>
+                <th>Anmerkungen</th>
+                <th>Aktion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in lager %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.modell }}</td>
+                <td>{{ item.hersteller }}</td>
+                <td>{{ item.seriennummer }}</td>
+                <td>{{ item.kunde }}</td>
+                <td>{{ item.verkauft }}</td>
+                <td>{{ item.anzahlung }}</td>
+                <td>{{ item.gesamtpreis }}</td>
+                <td style="color: {% if item.offene_summe > 0 %}red{% else %}black{% endif %};">
+                    {{ item.offene_summe }}
+                </td>
+                <td>{{ item.lagerbestand }}</td>
+                <td>{{ item.standort }}</td>
+                <td>{{ item.eingangsdatum }}</td>
+                <td>{{ item.anmerkungen }}</td>
+                <td>
+                    <a href="{{ url_for('delete', id=item.id) }}" onclick="return confirm('Möchtest du diesen Eintrag wirklich löschen?')">Löschen</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Neues Modell hinzufügen</h3>
+    <form method="POST" action="{{ url_for('add') }}">
+        <label>Modell:</label>
+        <input type="text" name="modell" required>
+        <br>
+        <label>Hersteller:</label>
+        <input type="text" name="hersteller" required>
+        <br>
+        <label>Seriennummer:</label>
+        <input type="text" name="seriennummer" required>
+        <br>
+        <label>Kunde:</label>
+        <input type="text" name="kunde">
+        <br>
+        <label>Verkauft:</label>
+        <select name="verkauft">
+            <option value="Nein">Nein</option>
+            <option value="Ja">Ja</option>
+        </select>
+        <br>
+        <label>Anzahlung (€):</label>
+        <input type="number" name="anzahlung" step="0.01" value="0">
+        <br>
+        <label>Gesamtpreis (€):</label>
+        <input type="number" name="gesamtpreis" step="0.01" required>
+        <br>
+        <label>Lagerbestand:</label>
+        <input type="number" name="lagerbestand" required>
+        <br>
+        <label>Standort:</label>
+        <input type="text" name="standort">
+        <br>
+        <label>Eingangsdatum:</label>
+        <input type="date" name="eingangsdatum">
+        <br>
+        <label>Anmerkungen:</label>
+        <textarea name="anmerkungen"></textarea>
+        <br>
+        <button type="submit">Hinzufügen</button>
+    </form>
+</body>
+</html>

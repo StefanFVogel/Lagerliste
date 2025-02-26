@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrierung</title>
+</head>
+<body>
+    <h2>Registrieren</h2>
+    <form method="POST">
+        <label>Benutzername:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Passwort:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Registrieren</button>
+    </form>
+    <p>Hast du bereits ein Konto? <a href="{{ url_for('login') }}">Einloggen</a></p>
+</body>
+</html>
