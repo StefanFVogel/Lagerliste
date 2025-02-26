@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eintrag bearbeiten</title>
+</head>
+<body>
+    <h2>Eintrag bearbeiten</h2>
+    <form method="POST">
+        <label>Modell:</label>
+        <input type="text" name="modell" value="{{ item.modell }}" required>
+        <br>
+        <label>Hersteller:</label>
+        <input type="text" name="hersteller" value="{{ item.hersteller }}" required>
+        <br>
+        <label>Kunde:</label>
+        <input type="text" name="kunde" value="{{ item.kunde }}">
+        <br>
+        <label>Verkauft:</label>
+        <select name="verkauft">
+            <option value="Nein" {% if item.verkauft == 'Nein' %}selected{% endif %}>Nein</option>
+            <option value="Ja" {% if item.verkauft == 'Ja' %}selected{% endif %}>Ja</option>
+        </select>
+        <br>
+        <label>Anzahlung (€):</label>
+        <input type="number" name="anzahlung" step="0.01" value="{{ item.anzahlung }}">
+        <br>
+        <label>Gesamtpreis (€):</label>
+        <input type="number" name="gesamtpreis" step="0.01" value="{{ item.gesamtpreis }}" required>
+        <br>
+        <label>Lagerbestand:</label>
+        <input type="number" name="lagerbestand" value="{{ item.lagerbestand }}" required>
+        <br>
+        <label>Standort:</label>
+        <input type="text" name="standort" value="{{ item.standort }}">
+        <br>
+        <label>Eingangsdatum:</label>
+        <input type="date" name="eingangsdatum" value="{{ item.eingangsdatum }}">
+        <br>
+        <label>Anmerkungen:</label>
+        <textarea name="anmerkungen">{{ item.anmerkungen }}</textarea>
+        <br>
+        <button type="submit">Speichern</button>
+        <a href="{{ url_for('index') }}">Abbrechen</a>
+    </form>
+</body>
+</html>

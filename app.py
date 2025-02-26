@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lagerliste.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+# Sicherstellen, dass das Templates-Verzeichnis existiert
+if not os.path.exists('templates'):
+    os.makedirs('templates')
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,7 +22,6 @@ class Lagerliste(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modell = db.Column(db.String(100), nullable=False)
     hersteller = db.Column(db.String(100), nullable=False)
-    seriennummer = db.Column(db.String(50), unique=True, nullable=False)
     kunde = db.Column(db.String(100), nullable=True)
     verkauft = db.Column(db.String(10), nullable=False, default='Nein')
     anzahlung = db.Column(db.Float, default=0.0)
@@ -68,7 +72,6 @@ def add():
         return redirect(url_for('login'))
     modell = request.form['modell']
     hersteller = request.form['hersteller']
-    seriennummer = request.form['seriennummer']
     kunde = request.form['kunde']
     verkauft = request.form['verkauft']
     anzahlung = float(request.form['anzahlung'])
@@ -80,7 +83,7 @@ def add():
     anmerkungen = request.form['anmerkungen']
 
     neues_modell = Lagerliste(
-        modell=modell, hersteller=hersteller, seriennummer=seriennummer,
+        modell=modell, hersteller=hersteller,
         kunde=kunde, verkauft=verkauft, anzahlung=anzahlung,
         gesamtpreis=gesamtpreis, offene_summe=offene_summe,
         lagerbestand=lagerbestand, standort=standort,
@@ -89,6 +92,27 @@ def add():
     db.session.add(neues_modell)
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    item = Lagerliste.query.get(id)
+    if request.method == 'POST':
+        item.modell = request.form['modell']
+        item.hersteller = request.form['hersteller']
+        item.kunde = request.form['kunde']
+        item.verkauft = request.form['verkauft']
+        item.anzahlung = float(request.form['anzahlung'])
+        item.gesamtpreis = float(request.form['gesamtpreis'])
+        item.offene_summe = item.gesamtpreis - item.anzahlung
+        item.lagerbestand = int(request.form['lagerbestand'])
+        item.standort = request.form['standort']
+        item.eingangsdatum = request.form['eingangsdatum']
+        item.anmerkungen = request.form['anmerkungen']
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('edit.html', item=item)
 
 @app.route('/delete/<int:id>')
 def delete(id):

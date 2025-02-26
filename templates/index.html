@@ -15,7 +15,6 @@
                 <th>ID</th>
                 <th>Modell</th>
                 <th>Hersteller</th>
-                <th>Seriennummer</th>
                 <th>Kunde</th>
                 <th>Verkauft</th>
                 <th>Anzahlung (€)</th>
@@ -34,7 +33,6 @@
                 <td>{{ item.id }}</td>
                 <td>{{ item.modell }}</td>
                 <td>{{ item.hersteller }}</td>
-                <td>{{ item.seriennummer }}</td>
                 <td>{{ item.kunde }}</td>
                 <td>{{ item.verkauft }}</td>
                 <td>{{ item.anzahlung }}</td>
@@ -48,6 +46,7 @@
                 <td>{{ item.anmerkungen }}</td>
                 <td>
                     <a href="{{ url_for('delete', id=item.id) }}" onclick="return confirm('Möchtest du diesen Eintrag wirklich löschen?')">Löschen</a>
+                    <a href="{{ url_for('edit', id=item.id) }}">Bearbeiten</a>
                 </td>
             </tr>
             {% endfor %}
