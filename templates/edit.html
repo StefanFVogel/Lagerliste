@@ -18,6 +18,14 @@
                 <input type="text" class="form-control" name="modell" value="{{ item.modell }}" required>
             </div>
             <div class="mb-3">
+                <label class="form-label">Farbschema:</label>
+                <input type="text" class="form-control" name="farbschema" value="{{ item.farbschema }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Maßstab:</label>
+                <input type="text" class="form-control" name="maßstab" value="{{ item.maßstab }}">
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Hersteller:</label>
                 <input type="text" class="form-control" name="hersteller" value="{{ item.hersteller }}" required>
             </div>
@@ -46,7 +54,10 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Standort:</label>
-                <input type="text" class="form-control" name="standort" value="{{ item.standort }}">
+                <select class="form-select" name="standort">
+                    <option value="Weeze" {% if item.standort == 'Weeze' %}selected{% endif %}>Weeze</option>
+                    <option value="Niedenstein" {% if item.standort == 'Niedenstein' %}selected{% endif %}>Niedenstein</option>
+                </select>
             </div>
             <div class="mb-3">
                 <label class="form-label">Eingangsdatum:</label>

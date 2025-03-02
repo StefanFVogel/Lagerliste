@@ -15,11 +15,13 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">Neues Modell hinzufügen</button>
     </div>
 
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover table-bordered">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Modell</th>
+                <th>Farbschema</th>
+                <th>Maßstab</th>
                 <th>Hersteller</th>
                 <th>Kunde</th>
                 <th>Verkauft</th>
@@ -38,6 +40,8 @@
             <tr>
                 <td>{{ item.id }}</td>
                 <td>{{ item.modell }}</td>
+                <td>{{ item.farbschema }}</td>
+                <td>{{ item.maßstab }}</td>
                 <td>{{ item.hersteller }}</td>
                 <td>{{ item.kunde }}</td>
                 <td>{{ item.verkauft }}</td>
@@ -48,7 +52,7 @@
                 </td>
                 <td>{{ item.lagerbestand }}</td>
                 <td>{{ item.standort }}</td>
-                <td>{{ item.eingangsdatum }}</td>
+                <td>{{ item.eingangsdatum|date_de }}</td>
                 <td>{{ item.anmerkungen }}</td>
                 <td>
                     <a href="{{ url_for('edit', id=item.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
@@ -59,67 +63,3 @@
         </tbody>
     </table>
 </div>
-
-<!-- Modal zum Hinzufügen eines neuen Modells -->
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addModalLabel">Neues Modell hinzufügen</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="{{ url_for('add') }}">
-            <div class="mb-3">
-                <label class="form-label">Modell:</label>
-                <input type="text" class="form-control" name="modell" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Hersteller:</label>
-                <input type="text" class="form-control" name="hersteller" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kunde:</label>
-                <input type="text" class="form-control" name="kunde">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Verkauft:</label>
-                <select class="form-select" name="verkauft">
-                    <option value="Nein">Nein</option>
-                    <option value="Ja">Ja</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Anzahlung (€):</label>
-                <input type="number" class="form-control" name="anzahlung" step="0.01" value="0">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Gesamtpreis (€):</label>
-                <input type="number" class="form-control" name="gesamtpreis" step="0.01" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Lagerbestand:</label>
-                <input type="number" class="form-control" name="lagerbestand" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Standort:</label>
-                <input type="text" class="form-control" name="standort">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Eingangsdatum:</label>
-                <input type="date" class="form-control" name="eingangsdatum">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Anmerkungen:</label>
-                <textarea class="form-control" name="anmerkungen"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Hinzufügen</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>

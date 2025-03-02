@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lagerliste.db'
@@ -20,7 +21,9 @@ class User(db.Model):
 
 class Lagerliste(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    modell = db.Column(db.String(100), nullable=False)
+    artikelnummer = db.Column(db.String(100), nullable=False)
+    artikelbezeichnung = db.Column(db.String(100), nullable=True)
+    maßstab = db.Column(db.String(50), nullable=True)
     hersteller = db.Column(db.String(100), nullable=False)
     kunde = db.Column(db.String(100), nullable=True)
     verkauft = db.Column(db.String(10), nullable=False, default='Nein')
@@ -28,9 +31,15 @@ class Lagerliste(db.Model):
     gesamtpreis = db.Column(db.Float, nullable=False)
     offene_summe = db.Column(db.Float, nullable=False)
     lagerbestand = db.Column(db.Integer, nullable=False, default=1)
-    standort = db.Column(db.String(100), nullable=True)
+    standort = db.Column(db.String(100), nullable=False, default='Weeze')
     eingangsdatum = db.Column(db.String(20), nullable=True)
     anmerkungen = db.Column(db.Text, nullable=True)
+
+@app.template_filter('date_de')
+def date_de_filter(value):
+    if value:
+        return datetime.strptime(value, "%Y-%m-%d").strftime("%d.%m.%Y")
+    return ""
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -64,13 +73,15 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     lager = Lagerliste.query.all()
-    return render_template('index.html', lager=lager)
+    return render_template('index.html', lager=lager, title='Lagerliste Final AeroTec GmbH')
 
 @app.route('/add', methods=['POST'])
 def add():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    modell = request.form['modell']
+    artikelnummer = request.form['artikelnummer']
+    artikelbezeichnung = request.form['artikelbezeichnung']
+    maßstab = request.form['maßstab']
     hersteller = request.form['hersteller']
     kunde = request.form['kunde']
     verkauft = request.form['verkauft']
@@ -83,11 +94,12 @@ def add():
     anmerkungen = request.form['anmerkungen']
 
     neues_modell = Lagerliste(
-        modell=modell, hersteller=hersteller,
-        kunde=kunde, verkauft=verkauft, anzahlung=anzahlung,
-        gesamtpreis=gesamtpreis, offene_summe=offene_summe,
-        lagerbestand=lagerbestand, standort=standort,
-        eingangsdatum=eingangsdatum, anmerkungen=anmerkungen)
+        artikelnummer=artikelnummer, artikelbezeichnung=artikelbezeichnung, maßstab=maßstab,
+        hersteller=hersteller, kunde=kunde, verkauft=verkauft,
+        anzahlung=anzahlung, gesamtpreis=gesamtpreis,
+        offene_summe=offene_summe, lagerbestand=lagerbestand,
+        standort=standort, eingangsdatum=eingangsdatum,
+        anmerkungen=anmerkungen)
 
     db.session.add(neues_modell)
     db.session.commit()
@@ -99,7 +111,9 @@ def edit(id):
         return redirect(url_for('login'))
     item = Lagerliste.query.get(id)
     if request.method == 'POST':
-        item.modell = request.form['modell']
+        item.artikelnummer = request.form['artikelnummer']
+        item.artikelbezeichnung = request.form['artikelbezeichnung']
+        item.maßstab = request.form['maßstab']
         item.hersteller = request.form['hersteller']
         item.kunde = request.form['kunde']
         item.verkauft = request.form['verkauft']
@@ -112,7 +126,7 @@ def edit(id):
         item.anmerkungen = request.form['anmerkungen']
         db.session.commit()
         return redirect(url_for('index'))
-    return render_template('edit.html', item=item)
+    return render_template('edit.html', item=item, standorte=['Weeze', 'Niedenstein'])
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -123,7 +137,7 @@ def delete(id):
     db.session.commit()
     return redirect(url_for('index'))
 
-
-with app.app_context():
-    db.create_all()
-app.run(debug=True)
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
