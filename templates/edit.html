@@ -10,26 +10,43 @@
   <div class="container mt-4">
     <h2 class="text-center mb-4">{% if item %}Eintrag bearbeiten{% else %}Neues Modell hinzufügen{% endif %}</h2>
     <div class="card p-4 shadow-sm">
-      <form method="POST">
-        <div class="mb-3">
-          <label class="form-label">Artikelnummer:</label>
-          <input type="text" class="form-control" name="artikelnummer" value="{{ item.artikelnummer if item else '' }}" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Artikelname:</label>
-          <input type="text" class="form-control" name="artikelname" value="{{ item.artikelname if item else '' }}">
-        </div>
+      <form method="POST" id="mainForm">
+        <!-- Abschnitt Hersteller und Artikel -->
         <div class="mb-3">
           <label class="form-label">Hersteller:</label>
-          <input type="text" class="form-control" name="hersteller" value="{{ item.hersteller if item else '' }}" required>
+          <select id="manufacturer_select" class="form-select">
+            <option value="">-- Bitte wählen --</option>
+            {% for m in manufacturers %}
+              <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
+            <option value="manual">Manuell eingeben</option>
+          </select>
+          <input type="text" class="form-control mt-2" id="hersteller_manual" placeholder="Hersteller manuell eingeben" style="display: none;">
+          <input type="hidden" id="hersteller_hidden" name="hersteller">
         </div>
+        <div class="mb-3" id="article_dropdown_container" style="display: none;">
+          <label class="form-label">Artikelnummer / Artikelname:</label>
+          <select id="article_select" class="form-select">
+            <!-- Optionen werden per JavaScript geladen -->
+          </select>
+        </div>
+        <div class="mb-3" id="article_manual_container" style="display: none;">
+          <label class="form-label">Artikelnummer:</label>
+          <input type="text" class="form-control" id="artikelnummer_manual" placeholder="Artikelnummer manuell eingeben">
+          <label class="form-label mt-2">Artikelname:</label>
+          <input type="text" class="form-control" id="artikelname_manual" placeholder="Artikelname manuell eingeben">
+        </div>
+        <input type="hidden" id="artikelnummer_hidden" name="artikelnummer">
+        <input type="hidden" id="artikelname_hidden" name="artikelname">
+
+        <!-- Restliche Felder -->
         <div class="mb-3">
           <label class="form-label">Rechnungsnummer Hersteller:</label>
           <input type="text" class="form-control" name="rechnungsnummer_hersteller" value="{{ item.rechnungsnummer_hersteller if item else '' }}" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Continer:</label>
-          <input type="text" class="form-control" name="continer" value="{{ item.continer if item else '' }}" required>
+          <label class="form-label">Container:</label>
+          <input type="text" class="form-control" name="container" value="{{ item.container if item else '' }}" required>
         </div>
         <div class="mb-3">
           <label class="form-label">Container Ankunftsdatum:</label>
@@ -73,6 +90,93 @@
       </form>
     </div>
   </div>
+  <script>
+    // Daten aus dem Backend
+    var articleData = {{ article_data|safe }};
+    var manualMode = {{ "true" if manual_mode else "false" }};
+    var initialHersteller = "{{ item.hersteller if item else '' }}";
+    var initialArtikelnummer = "{{ item.artikelnummer if item else '' }}";
+    var initialArtikelname = "{{ item.artikelname if item else '' }}";
+
+    var manufacturerSelect = document.getElementById('manufacturer_select');
+    var herstellerManual = document.getElementById('hersteller_manual');
+    var herstellerHidden = document.getElementById('hersteller_hidden');
+    var articleDropdownContainer = document.getElementById('article_dropdown_container');
+    var articleSelect = document.getElementById('article_select');
+    var articleManualContainer = document.getElementById('article_manual_container');
+    var artikelnummerManual = document.getElementById('artikelnummer_manual');
+    var artikelnameManual = document.getElementById('artikelname_manual');
+    var artikelnummerHidden = document.getElementById('artikelnummer_hidden');
+    var artikelnameHidden = document.getElementById('artikelname_hidden');
+
+    function populateArticleDropdown(manufacturer) {
+      articleSelect.innerHTML = "";
+      if(articleData[manufacturer]) {
+        articleData[manufacturer].forEach(function(item) {
+          var option = document.createElement('option');
+          option.value = item.artikelnummer + "|" + item.artikelname;
+          option.text = item.artikelnummer + " / " + item.artikelname;
+          articleSelect.appendChild(option);
+        });
+      }
+    }
+
+    function handleManufacturerChange() {
+      var selected = manufacturerSelect.value;
+      // Wenn "manuell" oder kein Eintrag bzw. kein zugehöriger Artikel vorhanden – manueller Modus
+      if(selected === "manual" || selected === "" || !articleData[selected]) {
+        herstellerManual.style.display = "block";
+        articleDropdownContainer.style.display = "none";
+        articleManualContainer.style.display = "block";
+      } else {
+        herstellerManual.style.display = "none";
+        articleDropdownContainer.style.display = "block";
+        articleManualContainer.style.display = "none";
+        populateArticleDropdown(selected);
+        if(initialHersteller === selected && initialArtikelnummer && initialArtikelname) {
+          var combinedValue = initialArtikelnummer + "|" + initialArtikelname;
+          articleSelect.value = combinedValue;
+        }
+      }
+    }
+
+    manufacturerSelect.addEventListener('change', handleManufacturerChange);
+
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+      var selected = manufacturerSelect.value;
+      if(selected === "manual" || selected === "" || !articleData[selected]) {
+        herstellerHidden.value = herstellerManual.value;
+        artikelnummerHidden.value = artikelnummerManual.value;
+        artikelnameHidden.value = artikelnameManual.value;
+      } else {
+        herstellerHidden.value = selected;
+        var articleValue = articleSelect.value;
+        if(articleValue.indexOf("|") > -1) {
+          var parts = articleValue.split("|");
+          artikelnummerHidden.value = parts[0];
+          artikelnameHidden.value = parts[1];
+        }
+      }
+    });
+
+    window.onload = function() {
+      if(initialHersteller) {
+        // Falls initialHersteller im Dropdown vorhanden ist, selektieren – ansonsten manuell
+        if(document.querySelector('#manufacturer_select option[value="' + initialHersteller + '"]')) {
+          manufacturerSelect.value = initialHersteller;
+          handleManufacturerChange();
+        } else {
+          manufacturerSelect.value = "manual";
+          herstellerManual.style.display = "block";
+          herstellerManual.value = initialHersteller;
+          articleDropdownContainer.style.display = "none";
+          articleManualContainer.style.display = "block";
+          artikelnummerManual.value = initialArtikelnummer;
+          artikelnameManual.value = initialArtikelname;
+        }
+      }
+    };
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

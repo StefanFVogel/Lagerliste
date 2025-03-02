@@ -27,7 +27,7 @@
           <th>Artikelname</th>
           <th>Hersteller</th>
           <th>RG Nr. Hersteller</th>
-          <th>Continer</th>
+          <th>Container</th>
           <th>Container Ankunftsdatum</th>
           <th>Kunde</th>
           <th>RG Nr. Kunde</th>
@@ -48,8 +48,8 @@
           <td>{{ item.artikelname }}</td>
           <td>{{ item.hersteller }}</td>
           <td>{{ item.rechnungsnummer_hersteller }}</td>
-          <td>{{ item.continer }}</td>
-          <td>{{ item.container_ankuftsdatum }}</td>
+          <td>{{ item.container }}</td>
+          <td>{{ item.container_ankunftsdatum }}</td>
           <td>{{ item.kunde }}</td>
           <td>{{ item.rechnungsnummer_kunde }}</td>
           <td>{{ item.verkauft.strftime('%d.%m.%Y') if item.verkauft else 'Nicht verkauft' }}</td>
