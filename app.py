@@ -22,17 +22,17 @@ class User(db.Model):
 class Lagerliste(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     artikelnummer = db.Column(db.String(100), nullable=False)
-    artikelbezeichnung = db.Column(db.String(100), nullable=True)
-    maßstab = db.Column(db.String(50), nullable=True)
+    artikelname = db.Column(db.String(250), nullable=True)
     hersteller = db.Column(db.String(100), nullable=False)
+    rechnungsnummer_hersteller = db.Column(db.String(100), nullable=False)
+    continer = db.Column(db.String(100), nullable=False)
+    container_ankuftsdatum = db.Column(db.String(20), nullable=True)
     kunde = db.Column(db.String(100), nullable=True)
-    verkauft = db.Column(db.String(10), nullable=False, default='Nein')
+    rechnungsnummer_kunde = db.Column(db.String(100), nullable=False)
+    verkauft = db.Column(db.Date, nullable=True)
     anzahlung = db.Column(db.Float, default=0.0)
     gesamtpreis = db.Column(db.Float, nullable=False)
-    offene_summe = db.Column(db.Float, nullable=False)
-    lagerbestand = db.Column(db.Integer, nullable=False, default=1)
     standort = db.Column(db.String(100), nullable=False, default='Weeze')
-    eingangsdatum = db.Column(db.String(20), nullable=True)
     anmerkungen = db.Column(db.Text, nullable=True)
 
 @app.template_filter('date_de')
@@ -73,37 +73,48 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     lager = Lagerliste.query.all()
-    return render_template('index.html', lager=lager, title='Lagerliste Final AeroTec GmbH')
+    return render_template('index.html', lager=lager)
 
-@app.route('/add', methods=['POST'])
-def add():
+@app.route('/new', methods=['GET', 'POST'])
+def new():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    artikelnummer = request.form['artikelnummer']
-    artikelbezeichnung = request.form['artikelbezeichnung']
-    maßstab = request.form['maßstab']
-    hersteller = request.form['hersteller']
-    kunde = request.form['kunde']
-    verkauft = request.form['verkauft']
-    anzahlung = float(request.form['anzahlung'])
-    gesamtpreis = float(request.form['gesamtpreis'])
-    offene_summe = gesamtpreis - anzahlung
-    lagerbestand = int(request.form['lagerbestand'])
-    standort = request.form['standort']
-    eingangsdatum = request.form['eingangsdatum']
-    anmerkungen = request.form['anmerkungen']
+    if request.method == 'POST':
+        artikelnummer = request.form['artikelnummer']
+        artikelname = request.form.get('artikelname')
+        hersteller = request.form['hersteller']
+        rechnungsnummer_hersteller = request.form['rechnungsnummer_hersteller']
+        continer = request.form['continer']
+        container_ankuftsdatum = request.form.get('container_ankuftsdatum')
+        kunde = request.form.get('kunde')
+        rechnungsnummer_kunde = request.form['rechnungsnummer_kunde']
+        verkauft_input = request.form.get('verkauft')
+        verkauft_date = datetime.strptime(verkauft_input, '%Y-%m-%d').date() if verkauft_input else None
+        anzahlung = float(request.form['anzahlung']) if request.form.get('anzahlung') else 0.0
+        gesamtpreis = float(request.form['gesamtpreis'])
+        standort = request.form['standort']
+        anmerkungen = request.form.get('anmerkungen')
 
-    neues_modell = Lagerliste(
-        artikelnummer=artikelnummer, artikelbezeichnung=artikelbezeichnung, maßstab=maßstab,
-        hersteller=hersteller, kunde=kunde, verkauft=verkauft,
-        anzahlung=anzahlung, gesamtpreis=gesamtpreis,
-        offene_summe=offene_summe, lagerbestand=lagerbestand,
-        standort=standort, eingangsdatum=eingangsdatum,
-        anmerkungen=anmerkungen)
-
-    db.session.add(neues_modell)
-    db.session.commit()
-    return redirect(url_for('index'))
+        neuer_eintrag = Lagerliste(
+            artikelnummer=artikelnummer,
+            artikelname=artikelname,
+            hersteller=hersteller,
+            rechnungsnummer_hersteller=rechnungsnummer_hersteller,
+            continer=continer,
+            container_ankuftsdatum=container_ankuftsdatum,
+            kunde=kunde,
+            rechnungsnummer_kunde=rechnungsnummer_kunde,
+            verkauft=verkauft_date,
+            anzahlung=anzahlung,
+            gesamtpreis=gesamtpreis,
+            standort=standort,
+            anmerkungen=anmerkungen
+        )
+        db.session.add(neuer_eintrag)
+        db.session.commit()
+        return redirect(url_for('index'))
+    # Bei GET wird dasselbe Template wie für das Bearbeiten verwendet, jedoch ohne vorhandenes item
+    return render_template('edit.html', item=None)
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
@@ -112,21 +123,22 @@ def edit(id):
     item = Lagerliste.query.get(id)
     if request.method == 'POST':
         item.artikelnummer = request.form['artikelnummer']
-        item.artikelbezeichnung = request.form['artikelbezeichnung']
-        item.maßstab = request.form['maßstab']
+        item.artikelname = request.form.get('artikelname')
         item.hersteller = request.form['hersteller']
-        item.kunde = request.form['kunde']
-        item.verkauft = request.form['verkauft']
-        item.anzahlung = float(request.form['anzahlung'])
+        item.rechnungsnummer_hersteller = request.form['rechnungsnummer_hersteller']
+        item.continer = request.form['continer']
+        item.container_ankuftsdatum = request.form.get('container_ankuftsdatum')
+        item.kunde = request.form.get('kunde')
+        item.rechnungsnummer_kunde = request.form['rechnungsnummer_kunde']
+        verkauft_input = request.form.get('verkauft')
+        item.verkauft = datetime.strptime(verkauft_input, '%Y-%m-%d').date() if verkauft_input else None
+        item.anzahlung = float(request.form['anzahlung']) if request.form.get('anzahlung') else 0.0
         item.gesamtpreis = float(request.form['gesamtpreis'])
-        item.offene_summe = item.gesamtpreis - item.anzahlung
-        item.lagerbestand = int(request.form['lagerbestand'])
         item.standort = request.form['standort']
-        item.eingangsdatum = request.form['eingangsdatum']
-        item.anmerkungen = request.form['anmerkungen']
+        item.anmerkungen = request.form.get('anmerkungen')
         db.session.commit()
         return redirect(url_for('index'))
-    return render_template('edit.html', item=item, standorte=['Weeze', 'Niedenstein'])
+    return render_template('edit.html', item=item)
 
 @app.route('/delete/<int:id>')
 def delete(id):
