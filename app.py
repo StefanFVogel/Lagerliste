@@ -190,7 +190,10 @@ def delete(id):
     db.session.commit()
     return redirect(url_for('index'))
 
+def main():
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
 
-with app.app_context():
-    db.create_all()
-app.run(debug=True)
+if __name__ == '__main__':
+    main()
