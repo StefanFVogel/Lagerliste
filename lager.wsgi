@@ -4,7 +4,7 @@ import sys, os
 sys.path.insert(0, '/var/www/lagerliste')
 
 # Falls du eine virtuelle Umgebung verwendest:
-# os.environ['PATH'] = '/var/www/lagerliste/venv/bin:' + os.environ['PATH']
+os.environ['PATH'] = '/home/adminaerotec/venv/bin:' + os.environ['PATH']
 
 # Setze ggf. notwendige Umgebungsvariablen
 os.environ['FLASK_APP'] = 'app.py'  # Passe 'app.py' an den Namen der Hauptdatei an
