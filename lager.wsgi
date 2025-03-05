@@ -1,13 +1,14 @@
 #!/usr/bin/python
 import sys, os
 # Pfad zur Anwendung hinzufügen
-sys.path.insert(0, '/var/www/lagerliste')
+sys.path.insert(0, '/var/www/vhosts/final-aerotec.de/lager.final-aerotec.de')
 
-# Falls du eine virtuelle Umgebung verwendest:
-os.environ['PATH'] = '/home/adminaerotec/venv/bin:' + os.environ['PATH']
+# Fügen Sie den site-packages Pfad der virtuellen Umgebung hinzu.
+# Passen Sie 'python3.x' an Ihre Python-Version an (z.B. python3.9)
+sys.path.insert(0, '/var/www/vhosts/final-aerotec.de/lager.final-aerotec.de/venv/lib/python3.x/site-packages')
 
 # Setze ggf. notwendige Umgebungsvariablen
-os.environ['FLASK_APP'] = 'app.py'  # Passe 'app.py' an den Namen der Hauptdatei an
+os.environ['FLASK_APP'] = 'app.py'  # Passe 'app.py' an, falls der Name der Hauptdatei anders lautet
 
 # Importiere die Flask-Anwendung
-from app import app as application  # Ersetze 'app' mit dem Modulnamen deiner Anwendung
+from app import app as application  # Ersetze 'app' ggf. mit dem Modulnamen deiner Anwendung

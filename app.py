@@ -12,8 +12,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 # Sicherstellen, dass das Templates-Verzeichnis existiert
-if not os.path.exists('templates'):
-    os.makedirs('templates')
+#    os.makedirs('templates')
 
 # Modelle
 
